@@ -1,0 +1,109 @@
+// Display all documents
+db.products.find({})
+
+// Category is Electronics
+db.products.find({ category: "Electronics" })
+
+// Available in Hyderabad
+db.products.find({ city: "Hyderabad" })
+
+// Price > 30000
+db.products.find({ price: { $gt: 30000 } })
+
+// Price < 20000
+db.products.find({ price: { $lt: 20000 } })
+
+// Price between 10000 and 50000
+db.products.find({ price: { $gte: 10000, $lte: 50000 } })
+
+// Category is Furniture
+db.products.find({ category: "Furniture" })
+
+// Electronics category AND Hyderabad city
+db.products.find({ category: "Electronics", city: "Hyderabad" })
+
+// City is Hyderabad OR Bangalore
+db.products.find({ city: { $in: ["Hyderabad", "Bangalore"] } })
+
+// Category is NOT Furniture
+db.products.find({ category: { $ne: "Furniture" } })
+
+// Only name and price (exclude _id)
+db.products.find({}, { name: 1, price: 1, _id: 0 })
+
+// Name, category, and city
+db.products.find({}, { name: 1, category: 1, city: 1, _id: 0 })
+
+// Sorted by price ascending
+db.products.find().sort({ price: 1 })
+
+// Sorted by price descending
+db.products.find().sort({ price: -1 })
+
+// Top 3 most expensive
+db.products.find().sort({ price: -1 }).limit(3)
+
+// 2 cheapest products
+db.products.find().sort({ price: 1 }).limit(2)
+
+// Skip first two documents
+db.products.find().skip(2)
+
+
+// Stock > 10
+db.products.find({ stock: { $gt: 10 } })
+
+// Stock <= 10
+db.products.find({ stock: { $lte: 10 } })
+
+// Electronics category AND price > 40000
+db.products.find({ category: "Electronics", price: { $gt: 40000 } })
+
+// Update price of "Laptop"
+db.products.updateOne({ name: "Laptop" }, { $set: { price: 50000 } })
+
+// Add discount field to all Electronics
+db.products.updateMany({ category: "Electronics" }, { $set: { discount: 10 } })
+
+// Delete product "Printer"
+db.products.deleteOne({ name: "Printer" })
+
+// Delete all products in Furniture category
+db.products.deleteMany({ category: "Furniture" })
+
+
+// Total product count
+db.products.countDocuments({})
+
+// Electronics count
+db.products.countDocuments({ category: "Electronics" })
+
+// Total stock available for each category
+db.products.aggregate([
+  { $group: { _id: "$category", totalStock: { $sum: "$stock" } } }
+])
+
+// Average price per category
+db.products.aggregate([
+  { $group: { _id: "$category", avgPrice: { $avg: "$price" } } }
+])
+
+// Maximum product price
+db.products.aggregate([
+  { $group: { _id: null, maxPrice: { $max: "$price" } } }
+])
+
+// Total inventory value (Sum of Price * Stock)
+db.products.aggregate([
+  { 
+    $project: { 
+      inventoryValue: { $multiply: ["$price", "$stock"] } 
+    } 
+  },
+  { 
+    $group: { 
+      _id: null, 
+      totalValue: { $sum: "$inventoryValue" } 
+    } 
+  }
+])
