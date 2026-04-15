@@ -1,0 +1,34 @@
+use("library_db")
+
+db.members.find()
+db.books.find()
+db.borrowings.find()
+
+db.members.find({ city: "Hyderabad" })
+db.books.find({ category: "Database" })
+db.books.find({ price: { $gt: 600 } })
+db.borrowings.find({ days_borrowed: { $gt: 5 } })
+
+db.books.find().sort({ price: -1 })
+db.members.find().sort({ name: 1 })
+
+db.members.countDocuments()
+db.books.countDocuments()
+db.books.countDocuments({ category: "Database" })
+
+db.books.aggregate([{ $group: { _id: null, avgPrice: { $avg: "$price" } } }])
+db.books.aggregate([{ $group: { _id: null, maxPrice: { $max: "$price" } } }])
+db.books.aggregate([{ $group: { _id: null, minPrice: { $min: "$price" } } }])
+db.borrowings.aggregate([{ $group: { _id: "$member_id", totalDays: { $sum: "$days_borrowed" } } }])
+
+db.borrowings.aggregate([{ $lookup: { from: "members", localField: "member_id", foreignField: "member_id", as: "member_info" } }])
+db.borrowings.aggregate([{ $lookup: { from: "books", localField: "book_id", foreignField: "book_id", as: "book_info" } }])
+db.borrowings.aggregate([{ $lookup: { from: "members", localField: "member_id", foreignField: "member_id", as: "m" } }, { $lookup: { from: "books", localField: "book_id", foreignField: "book_id", as: "b" } }, { $unwind: "$m" }, { $unwind: "$b" }, { $project: { _id: 0, member_name: "$m.name", book_title: "$b.title" } }])
+db.borrowings.aggregate([{ $group: { _id: "$book_id", totalBorrowed: { $sum: 1 } } }, { $lookup: { from: "books", localField: "_id", foreignField: "book_id", as: "book_info" } }, { $unwind: "$book_info" }, { $project: { _id: 0, title: "$book_info.title", totalBorrowed: 1 } }])
+
+db.borrowings.aggregate([{ $group: { _id: "$member_id", count: { $sum: 1 } } }])
+db.borrowings.aggregate([{ $group: { _id: "$book_id", count: { $sum: 1 } } }, { $sort: { count: -1 } }, { $limit: 1 }])
+db.borrowings.aggregate([{ $lookup: { from: "books", localField: "book_id", foreignField: "book_id", as: "book" } }, { $unwind: "$book" }, { $group: { _id: "$book.category", total: { $sum: 1 } } }])
+db.borrowings.aggregate([{ $group: { _id: "$member_id", count: { $sum: 1 } } }, { $match: { count: { $gt: 1 } } }])
+
+db.members.aggregate([{ $lookup: { from: "borrowings", localField: "member_id", foreignField: "member_id", as: "borrowed_list" } }, { $project: { _id: 0, name: 1, city: 1, total_borrowed: { $size: "$borrowed_list" } } }, { $sort: { total_borrowed: -1 } }])
