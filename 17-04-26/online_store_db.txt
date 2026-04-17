@@ -1,0 +1,149 @@
+// --- DATABASE SELECTION ---
+use("online_store_db") [cite: 160]
+
+// --- SETUP COLLECTIONS ---
+// 1. Create Customers Collection
+db.customers.insertMany([
+  { customer_id: 1, name: "Aarav", city: "Hyderabad", membership: "Gold", age: 24 },
+  { customer_id: 2, name: "Priya", city: "Bangalore", membership: "Silver", age: 28 },
+  { customer_id: 3, name: "Rahul", city: "Mumbai", membership: "Gold", age: 32 },
+  { customer_id: 4, name: "Sneha", city: "Delhi", membership: "Silver", age: 26 },
+  { customer_id: 5, name: "Kiran", city: "Hyderabad", membership: "Gold", age: 30 },
+  { customer_id: 6, name: "Meera", city: "Chennai", membership: "Bronze", age: 27 }
+]) [cite: 165-200]
+
+// 2. Create Products Collection
+db.products.insertMany([
+  { product_id: 101, name: "Laptop", category: "Electronics", price: 75000, stock: 10 },
+  { product_id: 102, name: "Phone", category: "Electronics", price: 50000, stock: 15 },
+  { product_id: 103, name: "Desk", category: "Furniture", price: 15000, stock: 8 },
+  { product_id: 104, name: "Chair", category: "Furniture", price: 7000, stock: 20 },
+  { product_id: 105, name: "Tablet", category: "Electronics", price: 30000, stock: 12 },
+  { product_id: 106, name: "Printer", category: "Electronics", price: 12000, stock: 5 }
+]) [cite: 201-217]
+
+// 3. Create Orders Collection
+db.orders.insertMany([
+  { order_id: 1001, customer_id: 1, product_id: 101, quantity: 1, order_date: "2026-03-01", status: "Delivered" },
+  { order_id: 1002, customer_id: 2, product_id: 102, quantity: 2, order_date: "2026-03-02", status: "Delivered" },
+  { order_id: 1003, customer_id: 1, product_id: 105, quantity: 1, order_date: "2026-03-03", status: "Pending" },
+  { order_id: 1004, customer_id: 3, product_id: 103, quantity: 1, order_date: "2026-03-05", status: "Delivered" },
+  { order_id: 1005, customer_id: 5, product_id: 102, quantity: 3, order_date: "2026-03-07", status: "Cancelled" },
+  { order_id: 1006, customer_id: 6, product_id: 104, quantity: 4, order_date: "2026-03-08", status: "Delivered" },
+  { order_id: 1007, customer_id: 4, product_id: 106, quantity: 2, order_date: "2026-03-09", status: "Pending" },
+  { order_id: 1008, customer_id: 3, product_id: 101, quantity: 1, order_date: "2026-03-10", status: "Delivered" }
+]) [cite: 219-250]
+
+// --- BASIC QUERIES ---
+// 1. Display all documents from customers
+db.customers.find()
+// 2. Display all documents from products
+db.products.find()
+// 3. Display all documents from orders
+db.orders.find()
+// 4. Display customers from Hyderabad
+db.customers.find({ city: "Hyderabad" })
+// 5. Display products from Electronics category
+db.products.find({ category: "Electronics" })
+// 6. Display orders with status Delivered
+db.orders.find({ status: "Delivered" })
+
+// --- FILTERING QUERIES ---
+// 7. Products price > 30000
+db.products.find({ price: { $gt: 30000 } })
+// 8. Products price between 10000 and 50000
+db.products.find({ price: { $gte: 10000, $lte: 50000 } })
+// 9. Customers age > 26
+db.customers.find({ age: { $gt: 26 } })
+// 10. Orders quantity > 1
+db.orders.find({ quantity: { $gt: 1 } })
+// 11. Products stock <= 10
+db.products.find({ stock: { $lte: 10 } })
+// 12. Orders status not Cancelled
+db.orders.find({ status: { $ne: "Cancelled" } })
+// 13. Customers from Hyderabad or Mumbai
+db.customers.find({ city: { $in: ["Hyderabad", "Mumbai"] } })
+
+// --- PROJECTION QUERIES ---
+// 14. Display only customer name and city
+db.customers.find({}, { name: 1, city: 1, _id: 0 })
+// 15. Display only product name, category, and price
+db.products.find({}, { name: 1, category: 1, price: 1, _id: 0 })
+// 16. Display only order_id, quantity, and status
+db.orders.find({}, { order_id: 1, quantity: 1, status: 1, _id: 0 })
+
+// --- SORTING, LIMIT, SKIP ---
+// 17. Products sorted by price ascending
+db.products.find().sort({ price: 1 })
+// 18. Products sorted by price descending
+db.products.find().sort({ price: -1 })
+// 19. Top 3 most expensive products
+db.products.find().sort({ price: -1 }).limit(3)
+// 20. 2 cheapest products
+db.products.find().sort({ price: 1 }).limit(2)
+// 21. Skip first 2 products and display rest
+db.products.find().skip(2)
+// 22. Customers sorted by age descending
+db.customers.find().sort({ age: -1 })
+
+// --- UPDATE OPERATIONS ---
+// 23. Update price of Laptop to 78000
+db.products.updateOne({ name: "Laptop" }, { $set: { price: 78000 } })
+// 24. Add field discount: 10 to Electronics
+db.products.updateMany({ category: "Electronics" }, { $set: { discount: 10 } })
+// 25. Add priority: "High" to Pending orders
+db.orders.updateMany({ status: "Pending" }, { $set: { priority: "High" } })
+// 26. Change Meera membership from Bronze to Silver
+db.customers.updateOne({ name: "Meera" }, { $set: { membership: "Silver" } })
+
+// --- DELETE OPERATIONS ---
+// 27. Delete product named Printer
+db.products.deleteOne({ name: "Printer" })
+// 28. Delete Furniture category
+db.products.deleteMany({ category: "Furniture" })
+// 29. Delete Cancelled orders
+db.orders.deleteMany({ status: "Cancelled" })
+
+// --- COUNT QUERIES ---
+// 30. Total customers
+db.customers.countDocuments({})
+// 31. Electronics products count
+db.products.countDocuments({ category: "Electronics" })
+// 32. Delivered orders count
+db.orders.countDocuments({ status: "Delivered" })
+// 33. Hyderabad customers count
+db.customers.countDocuments({ city: "Hyderabad" })
+
+// --- AGGREGATION QUERIES ---
+// 34. Total stock per category
+db.products.aggregate([{ $group: { _id: "$category", total_stock: { $sum: "$stock" } } }])
+// 35. Average price per category
+db.products.aggregate([{ $group: { _id: "$category", avg_price: { $avg: "$price" } } }])
+// 36. Maximum product price
+db.products.aggregate([{ $group: { _id: null, max_price: { $max: "$price" } } }])
+// 37. Minimum product price
+db.products.aggregate([{ $group: { _id: null, min_price: { $min: "$price" } } }])
+// 38. Total inventory value (price * stock)
+db.products.aggregate([{ $project: { name: 1, inventory_value: { $multiply: ["$price", "$stock"] } } }])
+// 39. Total quantity ordered per product
+db.orders.aggregate([{ $group: { _id: "$product_id", total_qty: { $sum: "$quantity" } } }])
+// 40. Total quantity ordered per customer
+db.orders.aggregate([{ $group: { _id: "$customer_id", total_qty: { $sum: "$quantity" } } }])
+
+// --- $LOOKUP QUERIES ---
+// 41. Orders with customer details
+db.orders.aggregate([{ $lookup: { from: "customers", localField: "customer_id", foreignField: "customer_id", as: "customer" } }])
+// 42. Orders with product details
+db.orders.aggregate([{ $lookup: { from: "products", localField: "product_id", foreignField: "product_id", as: "product" } }])
+// 43. Customer name and product name per order
+db.orders.aggregate([
+  { $lookup: { from: "customers", localField: "customer_id", foreignField: "customer_id", as: "c" } },
+  { $lookup: { from: "products", localField: "product_id", foreignField: "product_id", as: "p" } },
+  { $project: { customer_name: "$c.name", product_name: "$p.name", _id: 0 } }
+])
+// 44. Customer name, city, product name, quantity, and status
+db.orders.aggregate([
+  { $lookup: { from: "customers", localField: "customer_id", foreignField: "customer_id", as: "c" } },
+  { $lookup: { from: "products", localField: "product_id", foreignField: "product_id", as: "p" } },
+  { $project: { name: "$c.name", city: "$c.city", product: "$p.name", quantity: 1, status: 1, _id: 0 } }
+])

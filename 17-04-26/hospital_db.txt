@@ -1,0 +1,133 @@
+// --- DATABASE SELECTION ---
+use("hospital_db") [cite: 4]
+
+// --- SETUP COLLECTIONS ---
+db.patients.insertMany([
+  { patient_id: 1, name: "Aarav", city: "Hyderabad", age: 29, gender: "Male" },
+  { patient_id: 2, name: "Priya", city: "Bangalore", age: 34, gender: "Female" },
+  { patient_id: 3, name: "Rahul", city: "Mumbai", age: 41, gender: "Male" },
+  { patient_id: 4, name: "Sneha", city: "Delhi", age: 26, gender: "Female" },
+  { patient_id: 5, name: "Kiran", city: "Hyderabad", age: 37, gender: "Male" },
+  { patient_id: 6, name: "Meera", city: "Chennai", age: 31, gender: "Female" }
+]) [cite: 10-48]
+
+db.doctors.insertMany([
+  { doctor_id: 101, name: "Dr. Sharma", specialization: "Cardiology", consultation_fee: 1200, city: "Hyderabad" },
+  { doctor_id: 102, name: "Dr. Iyer", specialization: "Dermatology", consultation_fee: 1000, city: "Chennai" },
+  { doctor_id: 103, name: "Dr. Khan", specialization: "Orthopedics", consultation_fee: 1500, city: "Mumbai" },
+  { doctor_id: 104, name: "Dr. Reddy", specialization: "Pediatrics", consultation_fee: 800, city: "Hyderabad" },
+  { doctor_id: 105, name: "Dr. Mehta", specialization: "Neurology", consultation_fee: 2000, city: "Delhi" }
+]) [cite: 50-65]
+
+// --- BASIC QUERIES ---
+// 1. All patients
+db.patients.find() [cite: 91]
+// 2. All doctors
+db.doctors.find() [cite: 92]
+// 3. All appointments
+db.appointments.find() [cite: 93]
+// 4. Patients from Hyderabad
+db.patients.find({ city: "Hyderabad" }) [cite: 94]
+// 5. Cardiology doctors
+db.doctors.find({ specialization: "Cardiology" }) [cite: 95]
+// 6. Completed appointments
+db.appointments.find({ status: "Completed" }) [cite: 96]
+
+// --- FILTERING QUERIES ---
+// 7. Age > 30
+db.patients.find({ age: { $gt: 30 } }) [cite: 98]
+// 8. Fee > 1000
+db.doctors.find({ consultation_fee: { $gt: 1000 } }) [cite: 99]
+// 9. Fee between 900 and 1600
+db.doctors.find({ consultation_fee: { $gte: 900, $lte: 1600 } }) [cite: 100]
+// 10. Bill > 1000
+db.appointments.find({ bill_amount: { $gt: 1000 } }) [cite: 101]
+// 11. Status not Cancelled
+db.appointments.find({ status: { $ne: "Cancelled" } }) [cite: 102]
+// 12. Hyderabad or Mumbai
+db.patients.find({ city: { $in: ["Hyderabad", "Mumbai"] } }) [cite: 103]
+// 13. Hyderabad or Delhi doctors
+db.doctors.find({ city: { $in: ["Hyderabad", "Delhi"] } }) [cite: 104]
+
+// --- PROJECTION QUERIES ---
+// 14. Name and City
+db.patients.find({}, { name: 1, city: 1, _id: 0 }) [cite: 106]
+// 15. Doctor details
+db.doctors.find({}, { name: 1, specialization: 1, consultation_fee: 1, _id: 0 }) [cite: 107]
+// 16. Appointment summary
+db.appointments.find({}, { appointment_id: 1, status: 1, bill_amount: 1, _id: 0 }) [cite: 108]
+
+// --- SORTING, LIMIT, SKIP ---
+// 17. Fee ASC
+db.doctors.find().sort({ consultation_fee: 1 }) [cite: 110]
+// 18. Fee DESC
+db.doctors.find().sort({ consultation_fee: -1 }) [cite: 111]
+// 19. Top 3 highest fees
+db.doctors.find().sort({ consultation_fee: -1 }).limit(3) [cite: 112]
+// 20. 2 lowest fees
+db.doctors.find().sort({ consultation_fee: 1 }).limit(2) [cite: 113]
+// 21. Skip first 2 patients
+db.patients.find().skip(2) [cite: 114]
+// 22. Age DESC
+db.patients.find().sort({ age: -1 }) [cite: 115]
+
+// --- UPDATE OPERATIONS ---
+// 23. Update Dr. Sharma fee
+db.doctors.updateOne({ name: "Dr. Sharma" }, { $set: { consultation_fee: 1300 } }) [cite: 117]
+// 24. Priority High for Pending
+db.appointments.updateMany({ status: "Pending" }, { $set: { priority: "High" } }) [cite: 118]
+// 25. Availability for Hyderabad
+db.doctors.updateMany({ city: "Hyderabad" }, { $set: { available: true } }) [cite: 119]
+// 26. Meera city update
+db.patients.updateOne({ name: "Meera" }, { $set: { city: "Bangalore" } }) [cite: 120]
+
+// --- DELETE OPERATIONS ---
+// 27. Delete Dr. Iyer
+db.doctors.deleteOne({ name: "Dr. Iyer" }) [cite: 122]
+// 28. Delete Cancelled
+db.appointments.deleteMany({ status: "Cancelled" }) [cite: 123]
+// 29. Delete Delhi patients
+db.patients.deleteMany({ city: "Delhi" }) [cite: 124]
+
+// --- COUNT QUERIES ---
+// 30. Total patients
+db.patients.countDocuments({}) [cite: 126]
+// 31. Hyderabad doctors
+db.doctors.countDocuments({ city: "Hyderabad" }) [cite: 127]
+// 32. Completed appointments
+db.appointments.countDocuments({ status: "Completed" }) [cite: 128]
+// 33. Hyderabad patients
+db.patients.countDocuments({ city: "Hyderabad" }) [cite: 129]
+
+// --- AGGREGATION QUERIES ---
+// 34. Avg fee per specialization
+db.doctors.aggregate([{ $group: { _id: "$specialization", avg_fee: { $avg: "$consultation_fee" } } }]) [cite: 131]
+// 35. Max fee
+db.doctors.aggregate([{ $group: { _id: null, max_fee: { $max: "$consultation_fee" } } }]) [cite: 132]
+// 36. Min fee
+db.doctors.aggregate([{ $group: { _id: null, min_fee: { $min: "$consultation_fee" } } }]) [cite: 133]
+// 37. Total bill by status
+db.appointments.aggregate([{ $group: { _id: "$status", total: { $sum: "$bill_amount" } } }]) [cite: 134]
+// 38. Appointments per doctor
+db.appointments.aggregate([{ $group: { _id: "$doctor_id", total: { $sum: 1 } } }]) [cite: 135]
+// 40. Avg age per city
+db.patients.aggregate([{ $group: { _id: "$city", avg_age: { $avg: "$age" } } }]) [cite: 137]
+
+// --- LOOKUP QUERIES ---
+// 43. Appointments with Patient Details
+db.appointments.aggregate([
+  { $lookup: { from: "patients", localField: "patient_id", foreignField: "patient_id", as: "patient" } }
+]) [cite: 141]
+// 44. Appointments with Doctor Details
+db.appointments.aggregate([
+  { $lookup: { from: "doctors", localField: "doctor_id", foreignField: "doctor_id", as: "doctor" } }
+]) [cite: 142]
+
+// --- ADVANCED AGGREGATION ---
+// 49. Revenue per doctor
+db.appointments.aggregate([{ $group: { _id: "$doctor_id", revenue: { $sum: "$bill_amount" } } }]) [cite: 148]
+// 53. Completed revenue
+db.appointments.aggregate([
+  { $match: { status: "Completed" } },
+  { $group: { _id: null, total_revenue: { $sum: "$bill_amount" } } }
+]) [cite: 152]
