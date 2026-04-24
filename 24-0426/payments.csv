@@ -1,0 +1,12 @@
+payment_id,order_id,payment_type,amount
+
+1,1,Credit Card,81000
+2,2,UPI,1500
+3,3,Debit Card,75000
+4,4,Credit Card,12000
+5,5,UPI,40000
+6,6,UPI,9000
+7,7,Debit Card,3000
+8,8,Credit Card,30000
+9,9,UPI,500
+10,10,UPI,200

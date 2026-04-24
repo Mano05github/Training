@@ -1,0 +1,11 @@
+order_id,customer_id,order_date,status
+1,1,2024-03-01,Delivered
+2,2,2024-03-02,Delivered
+3,3,2024-03-03,Cancelled
+4,4,2024-03-04,Delivered
+5,5,2024-03-05,Delivered
+6,6,2024-03-06,Delivered
+7,7,2024-03-07,Pending
+8,8,2024-03-08,Delivered
+9,9,2024-03-09,Delivered
+10,10,2024-03-10,Delivered
